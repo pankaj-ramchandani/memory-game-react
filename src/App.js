@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import Images from "./Images";
 import { shuffle, take } from "lodash";
+import chime from "./chime.mp3";
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function App() {
   const [cards, setCards] = useState(shuffle([...Images, ...Images]));
@@ -17,6 +19,7 @@ function App() {
     setLayout(parseInt(value));
     setCards([...newImagesArray, ...newImagesArray]);
   }
+
   useEffect(() => {
     boardRef.current.style.gridTemplateColumns = `repeat(${layout}, 1fr)`;
     for (let i = 0; i < cards.length; i++) {
@@ -28,7 +31,7 @@ function App() {
       ].style.maxHeight = `calc((100vw - 90px) / ${layout})`;
     }
   }, [layout]);
-  function flipCard(index) {
+  async function flipCard(index) {
     if (won) {
       setCards(shuffle([...Images, ...Images]));
       setFoundPairs([]);
@@ -41,12 +44,17 @@ function App() {
     if (activeCards.length === 1) {
       const firstIndex = activeCards[0];
       const secondIndex = index;
-
+      setActiveCards([...activeCards, index]);
       if (cards[firstIndex] === cards[secondIndex]) {
+        setActiveCards([]);
+        new Audio(chime).play();
         setFoundPairs([...foundPairs, firstIndex, secondIndex]);
         if (foundPairs.length + 2 === cards.length) setWon(true);
+      } else {
+        setActiveCards([...activeCards, index]);
+        await delay(1000);
+        setActiveCards([]);
       }
-      setActiveCards([...activeCards, index]);
     }
     if (activeCards.length == 2) {
       setActiveCards([index]);
