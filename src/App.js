@@ -149,8 +149,8 @@ function App() {
           name=""
           id=""
           onChange={(e) => handleLayoutChange(e.target.value)}
-          defaultValue={layout}
         >
+          <option value={layout}>Select Layout</option>
           <option value="4">4 x 4</option>
           <option value="6">6 x 6</option>
         </select>
