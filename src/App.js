@@ -1,14 +1,33 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import Images from "./Images";
-import { shuffle } from "lodash";
+import { shuffle, take } from "lodash";
 
 function App() {
   const [cards, setCards] = useState(shuffle([...Images, ...Images]));
   const [clicks, setClicks] = useState(0);
-  const [won, setWon] = useState(true);
+  const [won, setWon] = useState(false);
   const [activeCards, setActiveCards] = useState([]);
   const [foundPairs, setFoundPairs] = useState([]);
+  const [layout, setLayout] = useState(6);
+  const boardRef = useRef();
+  const cardOuterRef = useRef([]);
+  function handleLayoutChange(value) {
+    const newImagesArray = take(Images, (value * value) / 2);
+    setLayout(parseInt(value));
+    setCards([...newImagesArray, ...newImagesArray]);
+  }
+  useEffect(() => {
+    boardRef.current.style.gridTemplateColumns = `repeat(${layout}, 1fr)`;
+    for (let i = 0; i < cards.length; i++) {
+      cardOuterRef.current[
+        i
+      ].style.height = `calc((100vh - 290px) / ${layout})`;
+      cardOuterRef.current[
+        i
+      ].style.maxHeight = `calc((100vw - 90px) / ${layout})`;
+    }
+  }, [layout]);
   function flipCard(index) {
     if (won) {
       setCards(shuffle([...Images, ...Images]));
@@ -36,7 +55,7 @@ function App() {
   }
   return (
     <div>
-      <div className="board">
+      <div className="board" ref={boardRef}>
         {cards.map((card, index) => {
           const flippedToFront =
             activeCards.indexOf(index) !== -1 ||
@@ -47,6 +66,8 @@ function App() {
             <div
               className={"card-outer " + flippedToFront}
               onClick={() => flipCard(index)}
+              ref={(el) => (cardOuterRef.current[index] = el)}
+              key={index}
             >
               <div className="card">
                 <div className="front">
@@ -58,7 +79,7 @@ function App() {
           );
         })}
       </div>
-      <div className="stats">
+      <div className="stats-settings">
         {won && (
           <>
             You won the game ! Congratulations !<br />
@@ -66,6 +87,16 @@ function App() {
         )}
         Click: {clicks} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Found Pairs:{" "}
         {foundPairs.length / 2}
+        <br />
+        <select
+          name=""
+          id=""
+          onChange={(e) => handleLayoutChange(e.target.value)}
+          defaultValue="6"
+        >
+          <option value="4">4 x 4</option>
+          <option value="6">6 x 6</option>
+        </select>
       </div>
     </div>
   );
