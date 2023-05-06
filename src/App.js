@@ -6,6 +6,7 @@ import chime from "./chime.mp3";
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function App() {
+  const LOCAL_STORAGE_KEY = "memory-game-layout";
   const [cards, setCards] = useState(shuffle([...Images, ...Images]));
   const [clicks, setClicks] = useState(0);
   const [won, setWon] = useState(false);
@@ -14,8 +15,18 @@ function App() {
   const [layout, setLayout] = useState(6);
   const boardRef = useRef();
   const cardOuterRef = useRef([]);
+
+  useEffect(() => {
+    const retrievedLayout = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+    if (retrievedLayout) setLayout(retrievedLayout);
+  }, []);
+
+  // handle layout changes
   function handleLayoutChange(value) {
     const newImagesArray = take(Images, (value * value) / 2);
+    setClicks(0);
+    setActiveCards([]);
+    setFoundPairs([]);
     setLayout(parseInt(value));
     setCards(shuffle([...newImagesArray, ...newImagesArray]));
   }
@@ -48,7 +59,14 @@ function App() {
     setCards(newImagesArray);
   }
 
+  // styling changes sideeffect on layout changes
   useEffect(() => {
+    const newImagesArray = take(Images, (layout * layout) / 2);
+    setClicks(0);
+    setActiveCards([]);
+    setFoundPairs([]);
+    setCards(shuffle([...newImagesArray, ...newImagesArray]));
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(layout));
     boardRef.current.style.gridTemplateColumns = `repeat(${layout}, 1fr)`;
     for (let i = 0; i < cards.length; i++) {
       cardOuterRef.current[
@@ -60,9 +78,9 @@ function App() {
     }
   }, [layout]);
 
+  // handling flip card action logic
   async function flipCard(index) {
     if (clicks === 0 && index === 6 && layout === 4) {
-      console.log(index);
       setEasterEggSettings();
     }
     if (won) {
@@ -88,9 +106,6 @@ function App() {
         await delay(1000);
         setActiveCards([]);
       }
-    }
-    if (activeCards.length == 2) {
-      setActiveCards([index]);
     }
     setClicks(clicks + 1);
   }
@@ -127,14 +142,14 @@ function App() {
             You won the game ! Congratulations !<br />
           </>
         )}
-        Click: {clicks} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Found Pairs:{" "}
+        Clicks: {clicks} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Found Pairs:{" "}
         {foundPairs.length / 2}
         <br />
         <select
           name=""
           id=""
           onChange={(e) => handleLayoutChange(e.target.value)}
-          defaultValue="6"
+          defaultValue={layout}
         >
           <option value="4">4 x 4</option>
           <option value="6">6 x 6</option>
