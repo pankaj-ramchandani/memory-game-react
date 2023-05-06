@@ -17,7 +17,35 @@ function App() {
   function handleLayoutChange(value) {
     const newImagesArray = take(Images, (value * value) / 2);
     setLayout(parseInt(value));
-    setCards([...newImagesArray, ...newImagesArray]);
+    setCards(shuffle([...newImagesArray, ...newImagesArray]));
+  }
+
+  //suprise setting for easter egg
+  function setEasterEggSettings() {
+    const imagesArray = shuffle(take(Images, (layout * layout) / 2));
+    const newImagesArray = [];
+    // Easter egg array
+    const pairs = [
+      [1, 2],
+      [3, 5],
+      [7, 11],
+      [13, 14],
+      [4, 8],
+      [6, 12],
+      [9, 16],
+      [10, 15],
+    ];
+    pairs.forEach((val, index) => {
+      newImagesArray[val[0] - 1] = newImagesArray[val[1] - 1] =
+        imagesArray[index];
+      // console.log([
+      //   newImagesArray[val[0] - 1],
+      //   newImagesArray[val[1] - 1],
+      //   imagesArray[index],
+      // ]);
+    });
+
+    setCards(newImagesArray);
   }
 
   useEffect(() => {
@@ -31,7 +59,12 @@ function App() {
       ].style.maxHeight = `calc((100vw - 90px) / ${layout})`;
     }
   }, [layout]);
+
   async function flipCard(index) {
+    if (clicks === 0 && index === 6 && layout === 4) {
+      console.log(index);
+      setEasterEggSettings();
+    }
     if (won) {
       setCards(shuffle([...Images, ...Images]));
       setFoundPairs([]);
@@ -46,8 +79,8 @@ function App() {
       const secondIndex = index;
       setActiveCards([...activeCards, index]);
       if (cards[firstIndex] === cards[secondIndex]) {
-        setActiveCards([]);
         new Audio(chime).play();
+        setActiveCards([]);
         setFoundPairs([...foundPairs, firstIndex, secondIndex]);
         if (foundPairs.length + 2 === cards.length) setWon(true);
       } else {
@@ -61,6 +94,7 @@ function App() {
     }
     setClicks(clicks + 1);
   }
+
   return (
     <div>
       <div className="board" ref={boardRef}>
