@@ -154,6 +154,11 @@ function App() {
           <option value="4">4 x 4</option>
           <option value="6">6 x 6</option>
         </select>
+        <br />
+        {foundPairs.length !== 0 && (
+            <button onClick={(e) => handleLayoutChange(layout)}>Reset</button>
+        )}
+        
       </div>
     </div>
   );
