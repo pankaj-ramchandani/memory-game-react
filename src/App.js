@@ -28,6 +28,7 @@ function App() {
     setActiveCards([]);
     setFoundPairs([]);
     setLayout(parseInt(value));
+    setWon(false);
     setCards(shuffle([...newImagesArray, ...newImagesArray]));
   }
 
