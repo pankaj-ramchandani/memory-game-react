@@ -15,6 +15,7 @@ function App() {
   const [layout, setLayout] = useState(6);
   const boardRef = useRef();
   const cardOuterRef = useRef([]);
+  const firstRender = useRef(true)
 
   useEffect(() => {
     const retrievedLayout = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
@@ -62,6 +63,10 @@ function App() {
 
   // styling changes sideeffect on layout changes
   useEffect(() => {
+    if(firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
     const newImagesArray = take(Images, (layout * layout) / 2);
     setClicks(0);
     setActiveCards([]);
